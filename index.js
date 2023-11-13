@@ -15,6 +15,19 @@ function checkPresence(name) {
     return false;
 }
 
+app.get('/delete/:name', (req, res) => {
+    //check if id is already in names
+    if (checkPresence(req.params.name)) {
+        //remove name from names
+        for (var i = 0; i < names.length; i++) {
+            if (names[i].title == req.params.name) {
+                names.splice(i, 1);
+            }
+        }
+        res.sendStatus(200);
+    };
+});
+
 //listen for http get requests
 app.get('/add/:id/:usr', (req, res) => {
     //check if id is already in names

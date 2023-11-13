@@ -35,7 +35,7 @@ app.get('/add/:id/:usr', (req, res) => {
         res.sendStatus(409);
         return;
     } if(!(checkPresence(req.params.id))) {
-        names.push({"title": req.params.id, "id": req.params.id, "registered": 0, "authorised": req.params.usr})
+        names.push({"title": req.params.id, "id": req.params.id, "reg": 0, "authorised": req.params.usr})
         res.sendStatus(201);
     };
 });
@@ -52,7 +52,7 @@ app.get('/register/:name/:set', (req, res) => {
     if (checkPresence(req.params.name)) {
         for (var i = 0; i < names.length; i++) {
             if (names[i].id == req.params.name) {
-                names[i].registered = parseInt(req.params.set);
+                names[i].reg = parseInt(req.params.set);
             }
         }
         res.sendStatus(200);

@@ -33,7 +33,7 @@ app.get('/register/:name/:set', (req, res) => {
     if (checkPresence(req.params.name)) {
         for (var i = 0; i < names.length; i++) {
             if (names[i].id == req.params.name) {
-                names[i].registered = req.params.set;
+                names[i].registered = parseInt(req.params.set);
             }
         }
         res.sendStatus(200);

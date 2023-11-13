@@ -17,8 +17,14 @@ function checkPresence(name) {
 
 //listen for http get requests
 app.get('/add/:id/:usr', (req, res) => {
-    names.push({"title": req.params.id, "id": req.params.id, "registered": 0, "authorised": req.params.usr})
-    res.sendStatus(201);
+    //check if id is already in names
+    if (checkPresence(req.params.id)) {
+        res.sendStatus(409);
+        return;
+    } if(!(checkPresence(req.params.id))) {
+        names.push({"title": req.params.id, "id": req.params.id, "registered": 0, "authorised": req.params.usr})
+        res.sendStatus(201);
+    };
 });
 
 app.get('/', (req, res) => {
@@ -37,7 +43,7 @@ app.get('/register/:name/:set', (req, res) => {
             }
         }
         res.sendStatus(200);
-    } else {
+    } if (!(checkPresence(req.params.name))) {
         res.sendStatus(404)
     }
 })

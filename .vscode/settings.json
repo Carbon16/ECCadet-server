@@ -1,0 +1,8 @@
+{
+    "appService.zipIgnorePattern": [
+        "node_modules{,/**}",
+        ".vscode{,/**}"
+    ],
+    "appService.defaultWebAppToDeploy": "/subscriptions/ff2040d4-504b-4985-a0ed-bf8e5e635573/resourceGroups/ECCadet/providers/Microsoft.Web/sites/ECCadet",
+    "appService.deploySubpath": "."
+}

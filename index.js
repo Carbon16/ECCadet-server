@@ -12,4 +12,8 @@ app.get('/api/:id', (req, res) => {
     res.send(names);
 });
 
+app.get('/', (req, res) => {
+    res.sendStatus(200);
+});
+
 app.listen(port, () => console.log(`Example app listening on port ${80}!`));

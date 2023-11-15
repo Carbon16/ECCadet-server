@@ -32,10 +32,10 @@ app.get('/delete/:name/:usr', (req, res) => {
         }
         res.sendStatus(200);
         //timestamp
-        var date = new Date();
-        var time = date.getTime();
-        var dateStr = date.toString()
-        logs.push(`${dateStr}: ${req.params.usr} removed ${req.parms.name}`)
+        var date = new Date()
+        var timestamp = date.toISOString();
+        logs.push(`${timestamp}: ${req.params.usr} removed ${req.params.name}`)
+        console.log(logs)
     };
 });
 

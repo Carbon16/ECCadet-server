@@ -39,6 +39,24 @@ app.get('/delete/:name/:usr', (req, res) => {
     };
 });
 
+app.get('/ax/:fname', (req, res) => {
+    //check if id is already in names
+    // forward any json files in the directory that match the filename in req.params.fname
+    res.sendFile(req.params.fname, { root: __dirname });
+});
+
+app.get('/filez', (req, res) => {
+    //return all json file names inside directory
+    var filez = []
+    const fs = require('fs');
+    fs.readdirSync(__dirname).forEach(file => {
+        if (file.endsWith('.json')) {
+            filez.push(file)
+        }
+    });
+    res.send(filez)
+});
+
 //listen for http get requests
 app.get('/add/:id/:usr', (req, res) => {
     //check if id is already in names
@@ -48,6 +66,11 @@ app.get('/add/:id/:usr', (req, res) => {
     } if(!(checkPresence(req.params.id))) {
         names.push({"title": req.params.id, "id": req.params.id, "reg": 0, "authorised": req.params.usr})
         res.sendStatus(201);
+        //save names to json file named the date only
+        var date = new Date()
+        var timestamp = date.getDate()
+        logs.push(`${timestamp}: ${req.params.usr} added ${req.params.id}`)
+        console.log(logs)
     };
 });
 

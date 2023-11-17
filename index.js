@@ -45,6 +45,42 @@ app.get('/ax/:fname', (req, res) => {
     res.sendFile(req.params.fname, { root: __dirname });
 });
 
+function convertToTick(inp) {
+    var tick = "✘"
+    if (inp == 1|inp == "1") {
+        tick =  "✓"
+    }
+    return tick;
+}
+
+app.get('/view', (req, res) => {
+    //send names as a webpage in detail
+    B = ""
+    S = ""
+    T = ""
+    N = ""
+    R = ""
+    var page = "<h1>Names</h1><br><ul>"
+    for (var i = 0; i < names.length; i++) {
+            let tick = convertToTick(names[i].reg)
+            if (names[i].service == "B") {
+                B += `<li>${names[i].title} - ${tick}</li>`
+            } if (names[i].service == "S") {
+                S += `<li>${names[i].title} - ${tick}</li>`
+            } if (names[i].service == "T") {
+                T += `<li>${names[i].title} - ${tick}</li>`
+            } if (names[i].service == "N") {
+                N += `<li>${names[i].title} - ${tick}</li>`
+            } if (names[i].service == "R") {
+                R += `<li>${names[i].title} - ${tick}</li>`
+            }
+            
+    }
+    page += `<h2>Bradford</h2><ul>${B}</ul><h2>Scott</h2><ul>${S}</ul><h2>Training</h2><ul>${T}</ul><h2>Navy</h2><ul>${N}</ul><h2>RAF</h2><ul>${R}</ul>`
+    res.send(page)
+});
+
+
 app.get('/filez', (req, res) => {
     //return all json file names inside directory
     var filez = []
@@ -58,17 +94,29 @@ app.get('/filez', (req, res) => {
 });
 
 //listen for http get requests
-app.get('/add/:id/:usr', (req, res) => {
+app.get('/add/:id/:usr/:serv', (req, res) => {
     //check if id is already in names
     if (checkPresence(req.params.id)) {
         res.sendStatus(409);
         return;
     } if(!(checkPresence(req.params.id))) {
-        names.push({"title": req.params.id, "id": req.params.id, "reg": 0, "authorised": req.params.usr})
+        if (req.params.serv == undefined) {
+            req.params.serv = "Client needs update!"
+        }
+        names.push({"title": req.params.id, "id": req.params.id, "reg": 0, "authorised": req.params.usr, "service": req.params.serv})
         res.sendStatus(201);
         //save names to json file named the date only
+        var date = new Date();
+        var timestamp = date.getUTCDate();
+        var name = timestamp + '.json';
+        var fs = require('fs');
+        fs.writeFile(name, JSON.stringify(names), function (err) {
+            if (err) throw err;
+            console.log('Saved!');
+        });
+        //timestamp
         var date = new Date()
-        var timestamp = date.getDate()
+        var timestamp = date.toISOString();
         logs.push(`${timestamp}: ${req.params.usr} added ${req.params.id}`)
         console.log(logs)
     };

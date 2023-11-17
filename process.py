@@ -833,9 +833,37 @@ for i in range(len(names)):
 
 #Print all the names with the lable R in alphabetical order, with teh tick or cross next to their name.
 
+Brad = []
+Scott = []
+Tranining = []
+R = []
+Naval = []
+Leadership = []
+
+for i in range(len(names)):
+  if names[i]['status'] == 'B':
+    Brad.push(names[i]['tick'] + ' ' + names[i]['title'])
+  
+for i in range(len(names)):
+  if names[i]['status'] == 'S':
+    Scott.push(names[i]['tick'] + ' ' + names[i]['title'])
+
 for i in range(len(names)):
   if names[i]['status'] == 'T':
-    print(names[i]['tick'] + ' ' + names[i]['title'])
+    Tranining.push(names[i]['tick'] + ' ' + names[i]['title'])
+
+for i in range(len(names)):
+  if names[i]['status'] == 'N':
+    Naval.push(names[i]['tick'] + ' ' + names[i]['title'])
+
+for i in range(len(names)):
+  if names[i]['status'] == 'R':
+    R.push(names[i]['tick'] + ' ' + names[i]['title'])
+  
+for i in range(len(names)):
+  if names[i]['status'] == 'L':
+    Leadership.push(names[i]['tick'] + ' ' + names[i]['title'])
+
 
 #return a count of the number of names in each list.
 

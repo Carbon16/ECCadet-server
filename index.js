@@ -48,6 +48,14 @@ app.get('/delete/:name/:usr', (req, res) => {
         var timestamp = date.toISOString();
         logs.push(`${timestamp}: ${req.params.usr} removed ${req.params.name}`)
         console.log(logs)
+        var date = new Date();
+        var timestamp = date.getUTCDate();
+        var name = timestamp + '.json';
+        var fs = require('fs');
+        fs.writeFile(name, JSON.stringify(names), function (err) {
+            if (err) throw err;
+            console.log('Saved!');
+        });
     };
 });
 

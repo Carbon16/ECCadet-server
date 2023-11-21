@@ -8,13 +8,16 @@ var names = []
 var tokens = []
 var logs = []
 
-//load json file to names
 var date = new Date();
 var timestamp = date.getUTCDate();
 var name = timestamp + '.json';
-var data = fs.readFileSync(name); // replace 'names.json' with your file path
-var json = JSON.parse(data.toString());
-names = json;
+
+// only run if file exists
+if (fs.existsSync(name)) {
+    var data = fs.readFileSync(name);
+    var json = JSON.parse(data.toString());
+    names = json;
+}
 
 function checkPresence(name) {
     //check names for the presence of name

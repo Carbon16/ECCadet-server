@@ -80,6 +80,7 @@ app.get('/view', (req, res) => {
     T = ""
     N = ""
     R = ""
+    L = ""
     var page = "<h1>Names</h1><br><ul>"
     for (var i = 0; i < names.length; i++) {
             let tick = convertToTick(names[i].reg)
@@ -93,10 +94,12 @@ app.get('/view', (req, res) => {
                 N += `<li>${names[i].title} - ${tick}</li>`
             } if (names[i].service == "R") {
                 R += `<li>${names[i].title} - ${tick}</li>`
+            } if (names[i].service == "L") {
+                L += `<li>${names[i].title} - ${tick}</li>`
             }
             
     }
-    page += `<h2>Bradford</h2><ul>${B}</ul><h2>Scott</h2><ul>${S}</ul><h2>Training</h2><ul>${T}</ul><h2>Navy</h2><ul>${N}</ul><h2>RAF</h2><ul>${R}</ul>`
+    page += `<h2>Bradford</h2><ul>${B}</ul><h2>Scott</h2><ul>${S}</ul><h2>Training</h2><ul>${T}</ul><h2>Navy</h2><ul>${N}</ul><h2>RAF</h2><ul>${R}</ul><h2>Leadership</h2><ul>${L}</ul>`
     res.send(page)
 });
 

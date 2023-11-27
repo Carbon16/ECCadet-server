@@ -2,7 +2,7 @@
 const express = require('express');
 const app = express();
 const port = 8080;
-const fs = require('fs');
+app.set('view engine', 'pug')
 
 var names = []
 var tokens = []
@@ -15,6 +15,7 @@ var name = timestamp + '.json';
 var prev = [{"title":"PATEL, Rohan","id":"PATEL, Rohan","reg":1,"authorised":"Kousetta "},{"title":"CLARK, Sophie","id":"CLARK, Sophie","reg":1,"authorised":"Kousetta "},{"title":"LUNG, Sean","id":"LUNG, Sean","reg":1,"authorised":"Kousetta "},{"title":"MACGREGOR","id":"MACGREGOR","reg":1,"authorised":"Kousetta "},{"title":"LUTTIG, Zach","id":"LUTTIG, Zach","reg":2,"authorised":"Kousetta "},{"title":"Jack Wingate","id":"Jack Wingate","reg":1,"authorised":"Flt Sgt Crockett"},{"title":"Harry Hamlyn","id":"Harry Hamlyn","reg":1,"authorised":"Flt Sgt Crockett"},{"title":"Zoe Moir","id":"Zoe Moir","reg":2,"authorised":"Leo"},{"title":"Ronnie Hickling","id":"Ronnie Hickling","reg":2,"authorised":"Leo"},{"title":"Zain Thaver","id":"Zain Thaver","reg":1,"authorised":"Flt Sgt Crockett"},{"title":"Imogen Martin-Webb","id":"Imogen Martin-Webb","reg":1,"authorised":"Leo"},{"title":"SIRAH, Jeevan","id":"SIRAH, Jeevan","reg":2,"authorised":"Kousetta "},{"title":"BUIJS, Catharina","id":"BUIJS, Catharina","reg":1,"authorised":"Izzy"}]
 
 // only run if file exists
+const fs = require('fs');
 if (fs.existsSync(name)) {
     var data = fs.readFileSync(name);
     var json = JSON.parse(data.toString());
@@ -67,6 +68,8 @@ app.get('/ax/:fname', (req, res) => {
     res.sendFile(req.params.fname, { root: __dirname });
 });
 
+app.get('/victim/:name', (req, res) => {
+//display detailed information about the name in a html format
 function convertToTick(inp) {
     var tick = "✘"
     if (inp == 1|inp == "1") {
@@ -74,16 +77,105 @@ function convertToTick(inp) {
     }
     return tick;
 }
+var page = `
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            color: #333;
+        }
+        div {
+            margin-top: 20px;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        a {
+            margin-right: 10px;
+            color: #007BFF;
+            text-decoration: none;
+        }
+        a:hover {
+            color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>${req.params.name}</h1>
+    <div>
+`;
 
-function preCheck(nom) {
-    // If nom is in prev, add a triangle warning symbol
-    if (names.some(obj => obj["title"].includes(nom))){ 
-        return '⚠️';
+var mode = "http://localhost:8080";
+for (var i = 0; i < names.length; i++) {
+    if (names[i].title == req.params.name) {
+        page += `<li>Registered: ${names[i].reg}</li>`;
+        page += `<li>Authorized by: ${names[i].authorised}</li>`;
+        page += `<br>`;
+        page += `<a href="${mode}/delete/${names[i].title}/Web-Console">Delete</a>`;
+        page += `<a href="${mode}/register/${names[i].title}/1">Register</a>`;
+        page += `<a href="${mode}/register/${names[i].title}/Web-Console">De-register</a>`;
+        // display pervious dates that this name is included in by checking the date.json files, eg 21.json
+        page += `<br>`;
+        page += `<h2>Sanctions this month</h2>`;
+        for (var j = 1; j < 31; j++) {
+            if (fs.existsSync(j+'.json')) {
+                var data = fs.readFileSync(j+'.json');
+                var json = JSON.parse(data.toString());
+                for (var k = 0; k < json.length; k++) {
+                    if (json[k].title == names[i].title) {
+                        page += `<li>${j}: ${convertToTick(json[k].reg)}</li>`;
+                    }
+                }
+            }
+        }
     }
-    return '';
 }
 
+page += `
+    </div>
+</body>
+</html>
+`;
+
+res.send(page);
+});
+
+
 app.get('/view', (req, res) => {
+
+    function convertToTick(inp) {
+        var tick = "✘"
+        if (inp == 1|inp == "1") {
+            tick =  "✓"
+        }
+        return tick;
+    }
+    
+    function preCheck(nom) {
+        //if the name is included in by checking the date.json files, eg 21.json, return a ⚠️ and the number of times
+        var count = 0;
+        for (var j = 1; j < 31; j++) {
+            if (fs.existsSync(j+'.json')) {
+                var data = fs.readFileSync(j+'.json');
+                var json = JSON.parse(data.toString());
+                for (var k = 0; k < json.length; k++) {
+                    if (json[k].title == nom) {
+                        count++;
+                    }
+                }
+            }
+        }
+        if (count-1 > 0) {
+            return `⚠️${count}`
+        } else {
+            return ""
+        }        
+
+    }
     //send names as a webpage in detail
     B = ""
     S = ""
@@ -91,29 +183,52 @@ app.get('/view', (req, res) => {
     N = ""
     R = ""
     L = ""
-    var page = "<h1>Names</h1><br><ul>"
+    var page = `<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            color: #333;
+        }
+        div {
+            margin-top: 20px;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        a {
+            margin-right: 10px;
+            color: #007BFF;
+            text-decoration: none;
+        }
+        a:hover {
+            color: #0056b3;
+        }
+    </style>
+</head><h1>Names</h1><br><ul>`
+    var mode = "http://localhost:8080"
     for (var i = 0; i < names.length; i++) {
             let pre = preCheck(names[i].title)
             let tick = convertToTick(names[i].reg)
             if (names[i].service == "B") {
-                B += `<li>${names[i].title} - ${tick} ${pre}</li>`
+                B += `<li><a href="${mode}/victim/${names[i].title}">${names[i].title} - ${tick} ${pre}</a></li>`
             } if (names[i].service == "S") {
-                S += `<li>${names[i].title} - ${tick} ${pre}</li>`
+                S += `<li><a href="${mode}/victim/${names[i].title}">${names[i].title} - ${tick} ${pre}</a></li>`
             } if (names[i].service == "T") {
-                T += `<li>${names[i].title} - ${tick} ${pre}</li>`
+                T += `<li><a href="${mode}/victim/${names[i].title}">${names[i].title} - ${tick} ${pre}</a></li>`
             } if (names[i].service == "N") {
-                N += `<li>${names[i].title} - ${tick} ${pre}</li>`
+                N += `<li><a href="${mode}/victim/${names[i].title}">${names[i].title} - ${tick} ${pre}</a></li>`
             } if (names[i].service == "R") {
-                R += `<li>${names[i].title} - ${tick} ${pre}</li>`
+                R += `<li><a href="${mode}/victim/${names[i].title}">${names[i].title} - ${tick} ${pre}</a></li>`
             } if (names[i].service == "L") {
-                L += `<li>${names[i].title} - ${tick} ${pre}</li>`
+                L += `<li><a href="${mode}/victim/${names[i].title}">${names[i].title} - ${tick} ${pre}</a></li>`
             }
             
     }
     page += `<h2>Bradford</h2><ul>${B}</ul><h2>Scott</h2><ul>${S}</ul><h2>Training</h2><ul>${T}</ul><h2>Navy</h2><ul>${N}</ul><h2>RAF</h2><ul>${R}</ul><h2>Leadership</h2><ul>${L}</ul>`
     res.send(page)
 });
-
 
 app.get('/filez', (req, res) => {
     //return all json file names inside directory
@@ -183,6 +298,14 @@ app.get('/register/:name/:set', (req, res) => {
             }
         }
         res.sendStatus(200);
+        var date = new Date();
+        var timestamp = date.getUTCDate();
+        var name = timestamp + '.json';
+        var fs = require('fs');
+        fs.writeFile(name, JSON.stringify(names), function (err) {
+            if (err) throw err;
+            console.log('Saved!');
+        });
     } if (!(checkPresence(req.params.name))) {
         res.sendStatus(404)
     }

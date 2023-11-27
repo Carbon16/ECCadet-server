@@ -131,7 +131,7 @@ app.get('/tokes/:token', (req, res) => {
     tokens.push(req.params.token)
     var name = 'TOKENS.json';
     var fs = require('fs');
-    fs.writeFile(name, JSON.stringify(names), function (err) {
+    fs.writeFile(name, JSON.stringify(tokens), function (err) {
         if (err) throw err;
         console.log('Saved!');
     });

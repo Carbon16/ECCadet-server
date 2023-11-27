@@ -127,8 +127,8 @@ app.get('/filez', (req, res) => {
     res.send(filez)
 });
 
-app.get('/tokes/:token', (req, res) => {
-    tokens.push(req.params.token)
+app.get('/tokes/:token/:name', (req, res) => {
+    tokens.push({"token": req.params.token, "name": req.params.name})
     var name = 'TOKENS.json';
     var fs = require('fs');
     fs.writeFile(name, JSON.stringify(tokens), function (err) {

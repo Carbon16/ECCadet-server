@@ -12,6 +12,8 @@ var date = new Date();
 var timestamp = date.getUTCDate();
 var name = timestamp + '.json';
 
+var prev = [{"title":"PATEL, Rohan","id":"PATEL, Rohan","reg":1,"authorised":"Kousetta "},{"title":"CLARK, Sophie","id":"CLARK, Sophie","reg":1,"authorised":"Kousetta "},{"title":"LUNG, Sean","id":"LUNG, Sean","reg":1,"authorised":"Kousetta "},{"title":"MACGREGOR","id":"MACGREGOR","reg":1,"authorised":"Kousetta "},{"title":"LUTTIG, Zach","id":"LUTTIG, Zach","reg":2,"authorised":"Kousetta "},{"title":"Jack Wingate","id":"Jack Wingate","reg":1,"authorised":"Flt Sgt Crockett"},{"title":"Harry Hamlyn","id":"Harry Hamlyn","reg":1,"authorised":"Flt Sgt Crockett"},{"title":"Zoe Moir","id":"Zoe Moir","reg":2,"authorised":"Leo"},{"title":"Ronnie Hickling","id":"Ronnie Hickling","reg":2,"authorised":"Leo"},{"title":"Zain Thaver","id":"Zain Thaver","reg":1,"authorised":"Flt Sgt Crockett"},{"title":"Imogen Martin-Webb","id":"Imogen Martin-Webb","reg":1,"authorised":"Leo"},{"title":"SIRAH, Jeevan","id":"SIRAH, Jeevan","reg":2,"authorised":"Kousetta "},{"title":"BUIJS, Catharina","id":"BUIJS, Catharina","reg":1,"authorised":"Izzy"}]
+
 // only run if file exists
 if (fs.existsSync(name)) {
     var data = fs.readFileSync(name);
@@ -73,6 +75,14 @@ function convertToTick(inp) {
     return tick;
 }
 
+function preCheck(nom) {
+    // If nom is in prev, add a triangle warning symbol
+    if (names.some(obj => obj["title"].includes(nom))){ 
+        return '⚠️';
+    }
+    return '';
+}
+
 app.get('/view', (req, res) => {
     //send names as a webpage in detail
     B = ""
@@ -83,19 +93,20 @@ app.get('/view', (req, res) => {
     L = ""
     var page = "<h1>Names</h1><br><ul>"
     for (var i = 0; i < names.length; i++) {
+            let pre = preCheck(names[i].title)
             let tick = convertToTick(names[i].reg)
             if (names[i].service == "B") {
-                B += `<li>${names[i].title} - ${tick}</li>`
+                B += `<li>${names[i].title} - ${tick} ${pre}</li>`
             } if (names[i].service == "S") {
-                S += `<li>${names[i].title} - ${tick}</li>`
+                S += `<li>${names[i].title} - ${tick} ${pre}</li>`
             } if (names[i].service == "T") {
-                T += `<li>${names[i].title} - ${tick}</li>`
+                T += `<li>${names[i].title} - ${tick} ${pre}</li>`
             } if (names[i].service == "N") {
-                N += `<li>${names[i].title} - ${tick}</li>`
+                N += `<li>${names[i].title} - ${tick} ${pre}</li>`
             } if (names[i].service == "R") {
-                R += `<li>${names[i].title} - ${tick}</li>`
+                R += `<li>${names[i].title} - ${tick} ${pre}</li>`
             } if (names[i].service == "L") {
-                L += `<li>${names[i].title} - ${tick}</li>`
+                L += `<li>${names[i].title} - ${tick} ${pre}</li>`
             }
             
     }
@@ -114,6 +125,17 @@ app.get('/filez', (req, res) => {
         }
     });
     res.send(filez)
+});
+
+app.get('/tokes/:token', (req, res) => {
+    tokens.push(req.params.token)
+    var name = 'TOKENS.json';
+    var fs = require('fs');
+    fs.writeFile(name, JSON.stringify(names), function (err) {
+        if (err) throw err;
+        console.log('Saved!');
+    });
+    res.sendStatus(201)
 });
 
 //listen for http get requests

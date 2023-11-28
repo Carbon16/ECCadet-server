@@ -22,6 +22,12 @@ if (fs.existsSync(name)) {
     names = json;
 }
 
+if (fs.existsSync("TOKENS.json")) {
+    var data = fs.readFileSync("TOKENS.json");
+    var json = JSON.parse(data.toString());
+    tokens = json;
+}
+
 function checkPresence(name) {
     //check names for the presence of name
     for (var i = 0; i < names.length; i++) {
@@ -66,6 +72,14 @@ app.get('/ax/:fname', (req, res) => {
     //check if id is already in names
     // forward any json files in the directory that match the filename in req.params.fname
     res.sendFile(req.params.fname, { root: __dirname });
+});
+
+app.get('/purge/:fname/Leo', (req, res) => {
+    fs.unlink(req.params.fname, (err) => {
+        if (err) throw err;
+        console.log(req.params.fname + ' was deleted');
+    });
+    res.sendStatus(200);
 });
 
 app.get('/victim/:name', (req, res) => {

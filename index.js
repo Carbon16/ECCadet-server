@@ -1,32 +1,98 @@
 //simple express server
 const express = require('express');
 const app = express();
+const { Expo } = require('expo-server-sdk');
 const port = 8080;
-app.set('view engine', 'pug')
+const fs = require('fs');
 
 var names = []
 var tokens = []
 var logs = []
 
-var date = new Date();
-var timestamp = date.getUTCDate();
-var name = timestamp + '.json';
-
-var prev = [{"title":"PATEL, Rohan","id":"PATEL, Rohan","reg":1,"authorised":"Kousetta "},{"title":"CLARK, Sophie","id":"CLARK, Sophie","reg":1,"authorised":"Kousetta "},{"title":"LUNG, Sean","id":"LUNG, Sean","reg":1,"authorised":"Kousetta "},{"title":"MACGREGOR","id":"MACGREGOR","reg":1,"authorised":"Kousetta "},{"title":"LUTTIG, Zach","id":"LUTTIG, Zach","reg":2,"authorised":"Kousetta "},{"title":"Jack Wingate","id":"Jack Wingate","reg":1,"authorised":"Flt Sgt Crockett"},{"title":"Harry Hamlyn","id":"Harry Hamlyn","reg":1,"authorised":"Flt Sgt Crockett"},{"title":"Zoe Moir","id":"Zoe Moir","reg":2,"authorised":"Leo"},{"title":"Ronnie Hickling","id":"Ronnie Hickling","reg":2,"authorised":"Leo"},{"title":"Zain Thaver","id":"Zain Thaver","reg":1,"authorised":"Flt Sgt Crockett"},{"title":"Imogen Martin-Webb","id":"Imogen Martin-Webb","reg":1,"authorised":"Leo"},{"title":"SIRAH, Jeevan","id":"SIRAH, Jeevan","reg":2,"authorised":"Kousetta "},{"title":"BUIJS, Catharina","id":"BUIJS, Catharina","reg":1,"authorised":"Izzy"}]
-
-// only run if file exists
-const fs = require('fs');
-if (fs.existsSync(name)) {
-    var data = fs.readFileSync(name);
-    var json = JSON.parse(data.toString());
-    names = json;
-}
 
 if (fs.existsSync("TOKENS.json")) {
     var data = fs.readFileSync("TOKENS.json");
     var json = JSON.parse(data.toString());
     tokens = json;
 }
+
+//push some data to tokens
+tokens.push({
+    name: "Leo",
+    token: "ExponentPushToken[VmF-9jCu-r4Mly5oOrniqx]"
+})
+
+tokens.push(
+    {
+        name: "Izzy",
+        token: "ExponentPushToken[ueguW8KZd8YA21_cSi4b-t]"
+    }
+)
+
+var date = new Date();
+var timestamp = date.getUTCDate();
+var name = timestamp + '.json';
+
+// Notifs
+
+let expo = new Expo()
+
+function newNotif(to, body) {
+    let messages = [];
+    // Check that all your push tokens appear to be valid Expo push tokens
+    if (!Expo.isExpoPushToken(to)) {
+        console.error(`Push token ${to} is not a valid Expo push token`);
+    }
+    // Construct a message (see https://docs.expo.io/push-notifications/sending-notifications/)
+    messages.push({
+        to: to,
+        sound: 'default',
+        body: body,
+    })
+
+    let chunks = expo.chunkPushNotifications(messages);
+
+    let tickets = [];
+    (async () => {
+    // Send the chunks to the Expo push notification service. There are
+    // different strategies you could use. A simple one is to send one chunk at a
+    // time, which nicely spreads the load out over time:
+    for (let chunk of chunks) {
+        try {
+        let ticketChunk = await expo.sendPushNotificationsAsync(chunk);
+        console.log(ticketChunk);
+        tickets.push(...ticketChunk);
+        // NOTE: If a ticket contains an error code in ticket.details.error, you
+        // must handle it appropriately. The error codes are listed in the Expo
+        // documentation:
+        // https://docs.expo.io/push-notifications/sending-notifications/#individual-errors
+        } catch (error) {
+            console.error(error);
+        }
+    }
+    })();
+}
+
+function notifyRem(victim, auth, oAuth) {
+    //if oauth in tokens.name
+    for (var i = 0; i < tokens.length; i++) {
+        if (tokens[i].name == oAuth) {
+            newNotif(tokens[i].token, `Your cadet, ${victim}, was removed by ${auth}`)
+        }
+    }
+}
+
+var prev = [{"title":"PATEL, Rohan","id":"PATEL, Rohan","reg":1,"authorised":"Kousetta "},{"title":"CLARK, Sophie","id":"CLARK, Sophie","reg":1,"authorised":"Kousetta "},{"title":"LUNG, Sean","id":"LUNG, Sean","reg":1,"authorised":"Kousetta "},{"title":"MACGREGOR","id":"MACGREGOR","reg":1,"authorised":"Kousetta "},{"title":"LUTTIG, Zach","id":"LUTTIG, Zach","reg":2,"authorised":"Kousetta "},{"title":"Jack Wingate","id":"Jack Wingate","reg":1,"authorised":"Flt Sgt Crockett"},{"title":"Harry Hamlyn","id":"Harry Hamlyn","reg":1,"authorised":"Flt Sgt Crockett"},{"title":"Zoe Moir","id":"Zoe Moir","reg":2,"authorised":"Leo"},{"title":"Ronnie Hickling","id":"Ronnie Hickling","reg":2,"authorised":"Leo"},{"title":"Zain Thaver","id":"Zain Thaver","reg":1,"authorised":"Flt Sgt Crockett"},{"title":"Imogen Martin-Webb","id":"Imogen Martin-Webb","reg":1,"authorised":"Leo"},{"title":"SIRAH, Jeevan","id":"SIRAH, Jeevan","reg":2,"authorised":"Kousetta "},{"title":"BUIJS, Catharina","id":"BUIJS, Catharina","reg":1,"authorised":"Izzy"}]
+
+// only run if file exists
+
+if (fs.existsSync(name)) {
+    var data = fs.readFileSync(name);
+    var json = JSON.parse(data.toString());
+    names = json;
+}
+
+
 
 if (fs.existsSync("log.json")) {
     var data = fs.readFileSync("log.json");
@@ -54,7 +120,10 @@ app.get('/delete/:name/:usr', (req, res) => {
         //remove name from names
         for (var i = 0; i < names.length; i++) {
             if (names[i].title == req.params.name) {
+                let oAuth = names[i].authorised
+                let victi = names[i].title
                 names.splice(i, 1);
+                notifyRem(victi, req.params.usr, oAuth)
             }
         }
         res.sendStatus(200);
@@ -89,6 +158,14 @@ app.get('/purge/:fname/Leo', (req, res) => {
         if (err) throw err;
         console.log(req.params.fname + ' was deleted');
     });
+    res.sendStatus(200);
+});
+
+app.get('/summon', (req, res) => {
+    //send a notification to every unique token in tokens
+    for (var i = 0; i < tokens.length; i++) {
+        newNotif(tokens[i].token, "Please dispatch all sanctions parade cadets ASAP")
+    }
     res.sendStatus(200);
 });
 
@@ -194,7 +271,7 @@ app.get('/view', (req, res) => {
             }
         }
         if (count-1 > 0) {
-            return `⚠️${count}`
+            return `⚠️ Strike ${count}`
         } else {
             return ""
         }        

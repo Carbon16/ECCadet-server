@@ -28,6 +28,12 @@ if (fs.existsSync("TOKENS.json")) {
     tokens = json;
 }
 
+if (fs.existsSync("log.json")) {
+    var data = fs.readFileSync("log.json");
+    var json = JSON.parse(data.toString());
+    logs = json;
+}
+
 function checkPresence(name) {
     //check names for the presence of name
     for (var i = 0; i < names.length; i++) {
@@ -57,6 +63,10 @@ app.get('/delete/:name/:usr', (req, res) => {
         var timestamp = date.toISOString();
         logs.push(`${timestamp}: ${req.params.usr} removed ${req.params.name}`)
         console.log(logs)
+        fs.writeFile("log.json", JSON.stringify(logs), function (err) {
+            if (err) throw err;
+            console.log('Saved!');
+        });
         var date = new Date();
         var timestamp = date.getUTCDate();
         var name = timestamp + '.json';

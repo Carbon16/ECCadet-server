@@ -9,6 +9,7 @@ const { send } = require('process');
 var names = []
 var tokens = []
 var logs = []
+var merits = []
 
 
 if (fs.existsSync("TOKENS.json")) {

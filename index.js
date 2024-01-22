@@ -4,6 +4,7 @@ const app = express();
 const { Expo } = require('expo-server-sdk');
 const port = 8080;
 const fs = require('fs');
+const { send } = require('process');
 
 var names = []
 var tokens = []
@@ -16,10 +17,17 @@ if (fs.existsSync("TOKENS.json")) {
     tokens = json;
 }
 
+if (fs.existsSync("merits.json")) {
+    var data = fs.readFileSync("merits.json");
+    var json = JSON.parse(data.toString());
+    merits = json;
+}
+
+
 //push some data to tokens
 tokens.push({
     name: "Leo",
-    token: "ExponentPushToken[VmF-9jCu-r4Mly5oOrniqx]"
+    token: "ExponentPushToken[FfdQW8JeDRD_z5sL5bZH3f]"
 })
 
 tokens.push(
@@ -113,6 +121,22 @@ function checkPresence(name) {
 app.get('/log', (req, res) => {
     res.send(logs)
 });
+
+app.get('/merit/:name/:usr/:service', (req, res) => {
+    merits.push({"name": req.params.name, "authorised": req.params.usr, "service": req.params.service})
+    var name = 'merits.json';
+    var fs = require('fs');
+    fs.writeFile(name, JSON.stringify(merits), function (err) {
+        if (err) throw err;
+        console.log('Saved!');
+    });
+    res.sendStatus(201);
+});
+
+app.get('/merits', (req, res) => {
+    res.send(merits)
+});
+
 
 app.get('/delete/:name/:usr', (req, res) => {
     //check if id is already in names
@@ -344,15 +368,27 @@ app.get('/filez', (req, res) => {
 });
 
 app.get('/tokes/:token/:name', (req, res) => {
-    tokens.push({"token": req.params.token, "name": req.params.name})
-    var name = 'TOKENS.json';
-    var fs = require('fs');
-    fs.writeFile(name, JSON.stringify(tokens), function (err) {
-        if (err) throw err;
-        console.log('Saved!');
-    });
-    res.sendStatus(201)
-});
+    //check if id is already in tokens
+    for (var i = 0; i < tokens.length; i++) {
+        if (tokens[i].token == req.params.token) {
+            res.sendStatus(409);
+            return;
+        } if(!(tokens[i].token == req.params.token)) {
+            tokens.push({"token": req.params.token, "name": req.params.name})
+            var name = 'TOKENS.json';
+            var fs = require('fs');
+            fs.writeFile(name, JSON.stringify(tokens), function (err) {
+                if (err) throw err;
+                console.log('Saved!');
+            });
+            res.sendStatus(201)
+            if (req.params.name == undefined) {
+                // ref is the last four letters of the token
+                var ref = req.params.token.slice(-4)
+                sendNotif(req.params.token, "Your username is unknow, please contact LGS with the reference " + ref)
+            }
+        }
+}});
 
 //listen for http get requests
 app.get('/add/:id/:usr/:serv', (req, res) => {

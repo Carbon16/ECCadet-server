@@ -368,6 +368,11 @@ app.get('/filez', (req, res) => {
     res.send(filez)
 });
 
+app.get('/tk', (req, res) => {
+    //return all tokens
+    res.send(tokens)
+});
+
 app.get('/tokes/:token/:name', (req, res) => {
     //check if id is already in tokens
     for (var i = 0; i < tokens.length; i++) {

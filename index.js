@@ -455,4 +455,9 @@ app.get('/register/:name/:set', (req, res) => {
     }
 })
 
+app.get('/version', (req, res) => {
+    res.send("1.0.0")
+    console.log("ver")
+});
+
 app.listen(port, () => console.log(`Example app listening on port ${80}!`));

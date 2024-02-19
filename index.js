@@ -456,7 +456,7 @@ app.get('/register/:name/:set', (req, res) => {
 })
 
 app.get('/version', (req, res) => {
-    res.send("1.0.0")
+    res.send("3.2.1")
     console.log("ver")
 });
 

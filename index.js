@@ -2,7 +2,7 @@
 const express = require('express');
 const app = express();
 const { Expo } = require('expo-server-sdk');
-const port = 8080;
+const port = 80;
 const fs = require('fs');
 const { send } = require('process');
 

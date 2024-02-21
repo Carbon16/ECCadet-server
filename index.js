@@ -236,7 +236,7 @@ var page = `
     <div>
 `;
 
-var mode = "https://eccadet.azurewebsites.net";
+var mode = "https://lgsk.tech";
 for (var i = 0; i < names.length; i++) {
     if (names[i].title == req.params.name) {
         page += `<li>Registered: ${names[i].reg}</li>`;
@@ -334,7 +334,7 @@ app.get('/view', (req, res) => {
         }
     </style>
 </head><h1>Names</h1><br><ul>`
-    var mode = "https://eccadet.azurewebsites.net"
+    var mode = "https://lgsk.tech"
     for (var i = 0; i < names.length; i++) {
             let pre = preCheck(names[i].title)
             let tick = convertToTick(names[i].reg)
